@@ -1,397 +1,305 @@
-# 🚀 Multi-Strategy Routing Engine
+<div align="center">
 
-A full-stack web application for optimizing grocery delivery routes using intelligent assignment algorithms. Built with Go and React, this demo showcases Shipt's approach to logistics optimization.
+# Multi-Strategy Routing Engine
 
-![Route Optimizer Dashboard](image.png)
+**A production-grade delivery route optimization platform built with Go, PostgreSQL, Redis, Kafka, and React.**
 
-![Tech Stack](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TailwindCSS](https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+Three optimization algorithms. Event-driven architecture. Real-time analytics.
+Containerized with Docker and orchestrated with Kubernetes.
 
-## ✨ Features
+[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![Kafka](https://img.shields.io/badge/Kafka-7.5-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat-square&logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
-### Core Optimization
-- **Smart Route Optimization**: Nearest-neighbor clustering algorithm
-- **Real Driving Routes**: Actual road-based routing (toggle between real routes vs. straight-line)
-- **Capacity Management**: Intelligent assignment respecting shopper capacity limits
+</div>
 
-### Analytics Dashboard
-- **System Performance**: Optimization score, efficiency metrics, resource utilization
-- **Shopper Analytics**: Individual performance, capacity utilization, time estimates
-- **Order Insights**: Distribution analysis, density mapping, time window breakdown
-- **Cost & Impact**: Fuel cost estimates, CO₂ savings calculations
+---
 
-### Visualization
-- **Interactive Maps**: Powered by Leaflet.js with real route geometry
-- **Live Updates**: Real-time route visualization as optimization runs
-- **Performance Metrics**: Comprehensive statistics and KPIs
-- **Modern UI**: Sleek interface with Shipt branding and smooth animations
+![Dashboard](image2.png)
 
-## 🏗️ Architecture
+![Optimize View](image.png)
+
+---
+
+## What This Does
+
+The engine takes a set of delivery orders and available shoppers, then finds the optimal assignment and routing using one of three algorithms — minimizing total travel distance while respecting capacity constraints. Results are persisted to PostgreSQL, cached in Redis, and optimization jobs can be dispatched asynchronously through Kafka.
+
+---
+
+## Architecture
 
 ```
-shipt-route-optimizer/
-├── backend/                 # Go REST API
-│   ├── cmd/
-│   │   └── main.go         # Application entry point
-│   ├── internal/
-│   │   ├── api/            # HTTP handlers
-│   │   ├── models/         # Data structures
-│   │   ├── optimizer/      # Route optimization logic
-│   │   └── data/           # Mock data generation
-│   ├── go.mod
-│   └── Makefile
-│
-└── frontend/               # React SPA
-    ├── src/
-    │   ├── components/     # React components
-    │   ├── api/            # API client
-    │   ├── App.jsx
-    │   └── main.jsx
-    ├── package.json
-    └── vite.config.js
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend (React)                        │
+│              Vite · Tailwind · Leaflet · Recharts               │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │ HTTP / NDJSON Stream
+┌───────────────────────────▼─────────────────────────────────────┐
+│                        API Service (Go/Gin)                     │
+│                                                                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
+│  │  REST API │  │  CRUD    │  │  Cache   │  │  Kafka         │  │
+│  │  Handlers │  │  Repos   │  │  Layer   │  │  Producer      │  │
+│  └──────────┘  └────┬─────┘  └────┬─────┘  └───────┬────────┘  │
+└──────────────────────┼────────────┼─────────────────┼───────────┘
+                       │            │                 │
+              ┌────────▼──┐  ┌──────▼──┐  ┌───────────▼──────────┐
+              │ PostgreSQL │  │  Redis  │  │       Kafka          │
+              │   (Data)   │  │ (Cache) │  │  (Event Streaming)   │
+              └────────────┘  └─────────┘  └───────────┬──────────┘
+                                                       │
+                                           ┌───────────▼──────────┐
+                                           │   Worker Service     │
+                                           │  (Async Optimizer)   │
+                                           └──────────────────────┘
 ```
 
-## 🛠️ Tech Stack
+---
 
-### Backend
-- **Go 1.21+** - High-performance backend
-- **Gin** - HTTP web framework
-- **CORS** - Cross-origin resource sharing
-- **OpenRouteService** - Real driving route calculation (optional)
+## Tech Stack
 
-### Frontend
-- **React 18** - UI library
-- **Vite** - Build tool & dev server
-- **TailwindCSS** - Utility-first CSS
-- **Leaflet.js** - Interactive maps
-- **Framer Motion** - Smooth animations
-- **Lucide React** - Icon library
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Language** | Go 1.21+ | Backend API and worker services |
+| **HTTP** | Gin | REST API framework with middleware |
+| **SQL Database** | PostgreSQL 16 | Orders, shoppers, optimization history |
+| **Cache** | Redis 7 | Distance matrix cache, result caching, rate limiting |
+| **Messaging** | Apache Kafka | Async optimization jobs, event-driven order lifecycle |
+| **Frontend** | React 18 + Vite | Dark-themed dashboard with shadcn-style components |
+| **Maps** | Leaflet.js | Interactive route visualization on dark CARTO tiles |
+| **Charts** | Recharts | Analytics charts (bar, area, pie) |
+| **Animations** | Framer Motion | Aceternity-style spotlight cards, moving borders |
+| **Containers** | Docker + Compose | Multi-service orchestration (7 containers) |
+| **Orchestration** | Kubernetes | Production deployment manifests |
+| **CI/CD** | GitHub Actions | Lint, test, build, Docker image push |
+| **Migrations** | golang-migrate | Versioned SQL schema migrations |
+| **Testing** | testify | Table-driven unit tests and HTTP handler tests |
 
-## 🚦 Getting Started
+---
 
-### Prerequisites
+## Algorithms
 
-- **Go 1.21+** ([Download](https://go.dev/dl/))
-- **Node.js 18+** ([Download](https://nodejs.org/))
-- **npm or yarn**
+### 1. Nearest Neighbor (Greedy)
 
-### Installation & Setup
+Assigns each order to the closest available shopper, then sequences stops using a greedy nearest-neighbor heuristic. Fast O(n²), good baseline.
 
-#### 1️⃣ Clone the Repository
+### 2. A* Search
+
+Solves the per-shopper TSP using A* with a minimum spanning tree (MST) lower-bound heuristic. Exact for up to 8 stops, beam search beyond. Typically 10-20% better than greedy.
+
+### 3. GRASP + ALNS (Hybrid Metaheuristic)
+
+Constructs initial solutions via GRASP with randomized candidate lists, then iteratively destroys and repairs them using Adaptive Large Neighborhood Search with simulated annealing acceptance. Runs across parallel goroutine workers with real-time NDJSON progress streaming.
+
+---
+
+## Quick Start
+
+### Option A: Docker Compose (recommended)
+
+One command to run the entire stack — API, worker, frontend, Postgres, Redis, Kafka:
 
 ```bash
-cd "Route Optimizer"
+docker-compose up --build
 ```
 
-#### 2️⃣ Configure Environment Variables
+Then open **http://localhost** in your browser.
 
-Copy the example environment file and add your API keys:
+### Option B: Local Development
+
+**Prerequisites:** Go 1.21+, Node.js 18+
 
 ```bash
+# Terminal 1 — Backend
 cd backend
 cp .env.example .env
-```
-
-Edit `.env` and add your OpenRouteService API key (optional but recommended for real routing):
-- Get a free API key at: https://openrouteservice.org/dev/#/signup
-- Update the `OPENROUTE_API_KEY` value in `.env`
-
-#### 3️⃣ Start the Backend (Port 8080)
-
-Open a terminal and run:
-
-**Option A: Using PowerShell (Recommended for Windows - loads .env automatically)**
-```powershell
-cd backend
-.\run.ps1
-```
-
-**Option B: Using Go directly**
-```bash
-cd backend
 go mod download
 go run cmd/main.go
-```
 
-**Option C: Using Make**
-```bash
-cd backend
-make run
-```
-
-You should see:
-```
-✓ Loaded .env file successfully
-✓ OpenRouteService API Key loaded (120 chars)
-🚀 Multi-Strategy Routing Engine Backend starting on :8080
-```
-
-**Note:** If you see "⚠ WARNING: OPENROUTE_API_KEY not found", the .env file wasn't loaded. Real routing will fallback to straight lines.
-
-#### 4️⃣ Start the Frontend (Port 5173)
-
-Open a **new terminal** and run:
-
-```bash
+# Terminal 2 — Frontend
 cd frontend
 npm install
 npm run dev
 ```
 
-The app will open automatically at **http://localhost:5173**
+Backend runs on `:8080`, frontend on `:5173`.
 
-## 📖 Usage Guide
+---
 
-1. **Load Sample Data**
-   - Click the "Load Sample Data" button
-   - 5 shoppers and 20 orders will appear on the map around Birmingham, AL
+## API Reference
 
-2. **Choose Algorithm**
-   - **Greedy**: Fast nearest-neighbor (default)
-   - **A* Search**: Optimal pathfinding with heuristics ⭐
-   - Toggle between them to compare performance!
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Health check (Postgres, Redis status) |
+| `GET` | `/api/sample-data` | Load 5 shoppers + 20 orders (Birmingham, AL) |
+| `POST` | `/api/optimize` | Basic nearest-neighbor optimization |
+| `POST` | `/api/optimize-analytics` | Optimization + full analytics + route geometries |
+| `POST` | `/api/optimize-hybrid-stream` | GRASP+ALNS solver with NDJSON progress stream |
+| `POST` | `/api/optimize-async` | Submit async job via Kafka (returns job ID) |
+| `GET` | `/api/optimize-async/:id` | Poll async job status |
+| `GET/POST` | `/api/orders` | List / create orders (PostgreSQL) |
+| `GET/POST` | `/api/shoppers` | List / create shoppers (PostgreSQL) |
+| `GET` | `/api/optimizations` | Optimization run history |
+| `GET` | `/api/optimizations/:id` | Single run with assignments |
 
-3. **Toggle Real Routes** (Optional)
-   - Enable the "Real Routes" checkbox in the header
-   - Routes will use actual driving directions instead of straight lines
-   - Note: Uses OpenRouteService API (may take a few seconds)
+---
 
-4. **Optimize Routes**
-   - Click "Optimize Routes"
-   - Watch routes animate on the map
-   - Analytics dashboard automatically opens on the right
+## Project Structure
 
-5. **Compare Algorithms**
-   - Run optimization with "Greedy" → Note the total distance
-   - Switch to "A* Search" and optimize again → Compare results!
-   - Typically 10-20% improvement with A*
-
-6. **Explore Analytics**
-   - **Overview Tab**: System-wide metrics, optimization score, costs
-   - **Shoppers Tab**: Individual shopper performance and efficiency
-   - **Orders Tab**: Order distribution and density analysis
-   - Click "Analytics" button to toggle dashboard visibility
-
-7. **Explore the Map**
-   - Green markers = Shoppers
-   - Orange markers = Orders
-   - Solid/dashed lines = Optimized routes (solid = real routes, dashed = straight lines)
-   - Click markers for detailed information
-
-6. **View Metrics**
-   - Total distance & duration
-   - Optimization score (0-100)
-   - Capacity utilization per shopper
-   - Time estimates for each route
-   - Fuel costs & CO₂ impact
-
-## 🧮 Algorithm Details
-
-### Optimization Algorithms
-
-The application offers **two optimization algorithms**:
-
-#### 1. Greedy Nearest-Neighbor (Fast)
-- **Distance Calculation**: Haversine formula for accurate geospatial distances
-- **Assignment**: Each order assigned to the nearest available shopper
-- **Capacity Management**: Respects individual shopper capacity limits
-- **Route Ordering**: Orders sorted by proximity for efficient routing
-- **Performance**: Very fast (~10ms), good solutions
-- **Use Case**: Real-time optimization, large datasets
-
-#### 2. A* Search (Optimal) ⭐ NEW!
-- **Intelligent Search**: Combines actual costs with heuristic estimates
-- **MST Lower Bound**: Sophisticated heuristic for better path exploration
-- **Guaranteed Optimal**: Finds shortest routes for small order sets (≤8 orders)
-- **Beam Search**: Near-optimal solutions for larger sets (>8 orders)
-- **Performance**: Slower (~100-200ms), 10-20% better routes
-- **Use Case**: When optimality matters, fuel cost minimization
-
-**See `ASTAR_ALGORITHM.md` for detailed technical explanation.**
-
-### Distance Formula
-
-```go
-func HaversineDistance(lat1, lng1, lat2, lng2 float64) float64 {
-    const earthRadius = 6371.0 // kilometers
-    // ... haversine implementation
-}
+```
+├── backend/
+│   ├── cmd/
+│   │   ├── main.go                    # API server entry point
+│   │   └── worker/main.go             # Kafka consumer worker
+│   ├── internal/
+│   │   ├── api/                       # HTTP handlers (REST + streaming)
+│   │   ├── cache/                     # Redis client, distance & result cache
+│   │   ├── database/                  # PostgreSQL pool, migrations
+│   │   │   └── migrations/            # SQL migration files
+│   │   ├── messaging/                 # Kafka producer, consumer, events
+│   │   ├── models/                    # Domain types
+│   │   ├── optimizer/                 # Greedy, A*, hybrid algorithms
+│   │   │   └── hybrid/               # GRASP + ALNS solver
+│   │   ├── repository/               # PostgreSQL CRUD repositories
+│   │   └── routing/                   # OpenRouteService client
+│   ├── Dockerfile                     # Multi-stage Go build
+│   ├── Makefile
+│   └── go.mod
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/                    # shadcn-style primitives
+│   │   │   ├── views/                 # Dashboard, Optimize, Analytics, History
+│   │   │   └── MapView.jsx            # Leaflet dark map
+│   │   ├── lib/utils.js               # cn(), formatters
+│   │   ├── api/optimizer.js           # API client
+│   │   └── App.jsx
+│   ├── Dockerfile                     # Node build + nginx
+│   └── package.json
+│
+├── k8s/                               # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── api-deployment.yaml            # 2-replica API with health probes
+│   ├── worker-deployment.yaml         # Kafka consumer worker
+│   ├── postgres-statefulset.yaml      # PVC-backed database
+│   ├── redis-deployment.yaml
+│   ├── kafka-statefulset.yaml         # Zookeeper + Kafka
+│   ├── configmap.yaml
+│   ├── secrets.yaml
+│   └── ingress.yaml
+│
+├── .github/workflows/ci.yml          # CI/CD pipeline
+├── docker-compose.yml                 # Full stack orchestration
+└── .env.example
 ```
 
-## 🌐 API Endpoints
+---
 
-### `GET /api/health`
-Health check endpoint
+## Database Schema
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "service": "shipt-route-optimizer"
-}
+Four tables with foreign key relationships, managed via golang-migrate:
+
+```sql
+shoppers        orders              optimization_runs     assignments
+─────────       ──────              ─────────────────     ───────────
+id (UUID PK)    id (UUID PK)        id (UUID PK)          id (UUID PK)
+name            lat, lng            algorithm             run_id (FK)
+lat, lng        item_count          total_orders          shopper_id
+capacity        delivery_window     total_shoppers        order_id
+status          status              distance_before       sequence_num
+created_at      created_at          distance_after        distance
+updated_at      updated_at          improvement_pct
+                                    duration_ms
+                                    created_at
 ```
 
-### `GET /api/sample-data`
-Returns mock orders and shoppers
+---
 
-**Response:**
-```json
-{
-  "orders": [...],
-  "shoppers": [...]
-}
+## Event-Driven Flow (Kafka)
+
+```
+API receives POST /api/optimize-async
+  │
+  ▼
+Publishes to topic: optimization.requests
+  │
+  ▼
+Worker consumes message
+  │
+  ▼
+Runs optimization algorithm
+  │
+  ├──▶ Persists result to PostgreSQL
+  │
+  └──▶ Publishes to topic: optimization.results
 ```
 
-### `POST /api/optimize`
-Basic route optimization (legacy)
+Topics: `order.events`, `optimization.requests`, `optimization.results`
 
-**Request:**
-```json
-{
-  "orders": [...],
-  "shoppers": [...]
-}
-```
+---
 
-**Response:**
-```json
-{
-  "assignments": [...],
-  "totalDistanceBefore": 20.8,
-  "totalDistanceAfter": 11.2
-}
-```
+## Testing
 
-### `POST /api/optimize-analytics` ⭐ New!
-Advanced optimization with comprehensive analytics
-
-**Request:**
-```json
-{
-  "orders": [...],
-  "shoppers": [...],
-  "useRealRoutes": true
-}
-```
-
-**Response:**
-```json
-{
-  "optimization": {
-    "assignments": [...],
-    "totalDistanceBefore": 20.8,
-    "totalDistanceAfter": 11.2
-  },
-  "analytics": {
-    "system": {
-      "optimizationScore": 87.5,
-      "totalDistance": 45.3,
-      "totalDuration": 125.5,
-      "estimatedFuelCost": 6.80,
-      "co2Saved": 2.72,
-      ...
-    },
-    "shoppers": [
-      {
-        "shopperId": "S1",
-        "ordersAssigned": 4,
-        "totalDistance": 11.2,
-        "totalDuration": 48.5,
-        "capacityUtilization": 80.0,
-        "efficiency": 4.94,
-        ...
-      }
-    ],
-    "orders": {...},
-    "routeGeometries": [...]
-  }
-}
-```
-
-## 🎨 Design Philosophy
-
-- **Shipt Brand Colors**: Primary green (#00C389) throughout
-- **Clean & Modern**: Minimal design with smooth transitions
-- **Responsive**: Works on desktop and tablet screens
-- **Accessible**: Clear labels and semantic HTML
-
-## 🔧 Development Commands
-
-### Backend
-
-```bash
-# Run server
-make run
-
-# Build binary
-make build
-
-# Run tests
-make test
-
-# Clean build artifacts
-make clean
-```
-
-### Frontend
-
-```bash
-# Development server
-npm run dev
-
-# Production build
-npm run build
-
-# Preview production build
-npm run preview
-```
-
-## 📦 Building for Production
-
-### Backend
+24 tests across two packages, all passing:
 
 ```bash
 cd backend
-make build
-./bin/shipt-route-optimizer
+go test ./... -v
+
+# Optimizer tests (17): Haversine, empty inputs, nearest-shopper,
+#   capacity, A* optimality, route improvement
+# Handler tests (7): health check, sample data, optimize endpoints,
+#   invalid input handling
 ```
 
-### Frontend
+---
+
+## CI/CD Pipeline
+
+GitHub Actions runs on push to `main` and on pull requests:
+
+1. **Lint** — `golangci-lint` static analysis
+2. **Test** — `go test -race` with Postgres + Redis service containers
+3. **Build** — Compile API and worker binaries
+4. **Docker** — Build and push images to GitHub Container Registry
+
+---
+
+## Kubernetes Deployment
 
 ```bash
-cd frontend
-npm run build
-# Deploy the 'dist' folder to your hosting service
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/
+
+# Verify
+kubectl get pods -n shipt-routing
 ```
 
-## 🐛 Troubleshooting
+The API deployment runs 2 replicas with HTTP readiness and liveness probes on `/api/health`.
 
-### Backend won't start
+---
 
-- Ensure port 8080 is available
-- Check Go version: `go version` (needs 1.21+)
-- Run `go mod download` to fetch dependencies
+## Environment Variables
 
-### Frontend can't connect to backend
+| Variable | Description | Default |
+|---|---|---|
+| `DATABASE_URL` | PostgreSQL connection string | — |
+| `REDIS_URL` | Redis connection string | — |
+| `KAFKA_BROKERS` | Comma-separated Kafka broker addresses | — |
+| `OPENROUTE_API_KEY` | OpenRouteService API key (optional, for real road routing) | — |
+| `PORT` | API server port | `8080` |
 
-- Verify backend is running on port 8080
-- Check CORS configuration in `backend/cmd/main.go`
-- Ensure `frontend/src/api/optimizer.js` points to correct URL
+All services degrade gracefully — the API runs without Postgres, Redis, or Kafka, falling back to in-memory operation.
 
-### Map not displaying
+---
 
-- Check browser console for errors
-- Ensure Leaflet CSS is loaded
-- Verify internet connection (map tiles load externally)
+## License
 
-## 🤝 Contributing
-
-This is a demo project. For production use:
-
-- Add authentication & authorization
-- Implement persistent data storage
-- Add comprehensive test coverage
-- Optimize for large-scale datasets
-- Add real-time updates via WebSockets
+MIT
 
