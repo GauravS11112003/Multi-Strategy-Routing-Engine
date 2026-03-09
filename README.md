@@ -395,15 +395,3 @@ This is a demo project. For production use:
 - Optimize for large-scale datasets
 - Add real-time updates via WebSockets
 
-## 📄 License
-
-This project is for demonstration purposes.
-
-## 👏 Acknowledgments
-
-Built for Shipt as a showcase of modern full-stack development practices.
-
----
-
-**Built with ❤️ using Go and React**
-
