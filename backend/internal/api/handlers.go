@@ -1,14 +1,20 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
+	"shipt-route-optimizer/internal/cache"
 	"shipt-route-optimizer/internal/data"
+	"shipt-route-optimizer/internal/database"
 	"shipt-route-optimizer/internal/models"
 	"shipt-route-optimizer/internal/optimizer"
 	"shipt-route-optimizer/internal/optimizer/hybrid"
+	"shipt-route-optimizer/internal/repository"
 	"shipt-route-optimizer/internal/routing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,10 +22,27 @@ import (
 // HealthCheck returns API health status
 func HealthCheck(c *gin.Context) {
 	apiKeySet := os.Getenv("OPENROUTE_API_KEY") != ""
+
+	dbStatus := "disconnected"
+	if database.Pool != nil {
+		if err := database.HealthCheck(c.Request.Context()); err == nil {
+			dbStatus = "connected"
+		}
+	}
+
+	redisStatus := "disconnected"
+	if cache.Client != nil {
+		if err := cache.HealthCheck(c.Request.Context()); err == nil {
+			redisStatus = "connected"
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "ok",
 		"service":   "shipt-route-optimizer",
 		"apiKeySet": apiKeySet,
+		"postgres":  dbStatus,
+		"redis":     redisStatus,
 	})
 }
 
@@ -125,12 +148,12 @@ func OptimizeWithAnalytics(c *gin.Context) {
 		return
 	}
 
-	// Default to nearest-neighbor if not specified
 	if req.Algorithm == "" {
 		req.Algorithm = "nearest-neighbor"
 	}
 
-	// Run optimization with analytics
+	start := time.Now()
+
 	optimizeResponse, analyticsResponse := optimizer.OptimizeWithAnalytics(
 		req.Orders,
 		req.Shoppers,
@@ -139,12 +162,22 @@ func OptimizeWithAnalytics(c *gin.Context) {
 		req.ApiKey, // Pass API key to optimizer
 	)
 
-	// Combine both responses
+	elapsed := time.Since(start)
+
 	response := gin.H{
 		"optimization": optimizeResponse,
 		"analytics":    analyticsResponse,
 		"algorithm":    req.Algorithm,
 	}
+
+	go persistOptimizationResult(
+		req.Algorithm,
+		len(req.Orders), len(req.Shoppers),
+		optimizeResponse.TotalDistanceBefore,
+		optimizeResponse.TotalDistanceAfter,
+		optimizeResponse.Assignments,
+		elapsed,
+	)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -234,6 +267,37 @@ func HybridSolveStream(c *gin.Context) {
 			})
 			flusher.Flush()
 			return
+		}
+	}
+}
+
+func persistOptimizationResult(algorithm string, totalOrders, totalShoppers int,
+	distanceBefore, distanceAfter float64, assignments []models.Assignment, elapsed time.Duration) {
+
+	if database.Pool == nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	improvementPct := 0.0
+	if distanceBefore > 0 {
+		improvementPct = ((distanceBefore - distanceAfter) / distanceBefore) * 100
+	}
+
+	run, err := repository.SaveOptimizationRun(ctx, algorithm, totalOrders, totalShoppers,
+		distanceBefore, distanceAfter, improvementPct, int(elapsed.Milliseconds()))
+	if err != nil {
+		log.Printf("Failed to persist optimization run: %v", err)
+		return
+	}
+
+	for _, a := range assignments {
+		for seq, orderID := range a.Route {
+			if err := repository.SaveAssignment(ctx, run.ID, a.ShopperID, orderID, seq, a.TotalDistance); err != nil {
+				log.Printf("Failed to persist assignment: %v", err)
+			}
 		}
 	}
 }

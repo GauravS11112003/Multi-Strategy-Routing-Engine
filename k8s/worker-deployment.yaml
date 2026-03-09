@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: shipt-routing
+  labels:
+    app: worker
+    app.kubernetes.io/part-of: shipt-routing-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: shipt-routing-engine/api:latest
+          command: ["/bin/worker"]
+          envFrom:
+            - configMapRef:
+                name: routing-engine-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: routing-engine-secrets
+                  key: DATABASE_URL
+            - name: OPENROUTE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: routing-engine-secrets
+                  key: OPENROUTE_API_KEY
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi

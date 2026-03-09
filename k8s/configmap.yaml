@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: routing-engine-config
+  namespace: shipt-routing
+  labels:
+    app.kubernetes.io/part-of: shipt-routing-engine
+data:
+  PORT: "8080"
+  KAFKA_BROKERS: "kafka.shipt-routing.svc.cluster.local:9092"
+  REDIS_URL: "redis://redis.shipt-routing.svc.cluster.local:6379/0"

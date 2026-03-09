@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS assignments;
+DROP TABLE IF EXISTS optimization_runs;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS shoppers;
