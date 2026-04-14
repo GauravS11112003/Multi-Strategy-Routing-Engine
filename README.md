@@ -2,15 +2,13 @@
 
 # Multi-Strategy Routing Engine
 
-**A production-grade delivery route optimization platform built with Go, PostgreSQL, Redis, Kafka, and React.**
+**A production-grade delivery route optimization platform built with Go, PostgreSQL, and React.**
 
 Three optimization algorithms. Event-driven architecture. Real-time analytics.
 Containerized with Docker and orchestrated with Kubernetes.
 
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
-[![Kafka](https://img.shields.io/badge/Kafka-7.5-231F20?style=flat-square&logo=apachekafka&logoColor=white)](https://kafka.apache.org)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat-square&logo=kubernetes&logoColor=white)](https://kubernetes.io)
@@ -19,15 +17,15 @@ Containerized with Docker and orchestrated with Kubernetes.
 
 ---
 
-![Dashboard](image2.png)
+![Dashboard](docs/assets/image2.png)
 
-![Optimize View](image.png)
+![Optimize View](docs/assets/image.png)
 
 ---
 
 ## What This Does
 
-The engine takes a set of delivery orders and available shoppers, then finds the optimal assignment and routing using one of three algorithms — minimizing total travel distance while respecting capacity constraints. Results are persisted to PostgreSQL, cached in Redis, and optimization jobs can be dispatched asynchronously through Kafka.
+The engine takes a set of delivery orders and available shoppers, then finds the optimal assignment and routing using one of three algorithms — minimizing total travel distance while respecting capacity constraints. Results are persisted to PostgreSQL.
 
 ---
 
@@ -42,21 +40,16 @@ The engine takes a set of delivery orders and available shoppers, then finds the
 ┌───────────────────────────▼─────────────────────────────────────┐
 │                        API Service (Go/Gin)                     │
 │                                                                 │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │
-│  │  REST API │  │  CRUD    │  │  Cache   │  │  Kafka         │  │
-│  │  Handlers │  │  Repos   │  │  Layer   │  │  Producer      │  │
-│  └──────────┘  └────┬─────┘  └────┬─────┘  └───────┬────────┘  │
-└──────────────────────┼────────────┼─────────────────┼───────────┘
-                       │            │                 │
-              ┌────────▼──┐  ┌──────▼──┐  ┌───────────▼──────────┐
-              │ PostgreSQL │  │  Redis  │  │       Kafka          │
-              │   (Data)   │  │ (Cache) │  │  (Event Streaming)   │
-              └────────────┘  └─────────┘  └───────────┬──────────┘
-                                                       │
-                                           ┌───────────▼──────────┐
-                                           │   Worker Service     │
-                                           │  (Async Optimizer)   │
-                                           └──────────────────────┘
+│  ┌──────────┐  ┌──────────┐  │
+│  │  REST API │  │  CRUD    │  │
+│  │  Handlers │  │  Repos   │  │
+│  └──────────┘  └────┬─────┘  │
+└──────────────────────┼────────┘
+                       │
+              ┌────────▼──┐
+              │ PostgreSQL │
+              │   (Data)   │
+              └────────────┘
 ```
 
 ---
@@ -65,11 +58,9 @@ The engine takes a set of delivery orders and available shoppers, then finds the
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **Language** | Go 1.21+ | Backend API and worker services |
+| **Language** | Go 1.21+ | Backend API service |
 | **HTTP** | Gin | REST API framework with middleware |
 | **SQL Database** | PostgreSQL 16 | Orders, shoppers, optimization history |
-| **Cache** | Redis 7 | Distance matrix cache, result caching, rate limiting |
-| **Messaging** | Apache Kafka | Async optimization jobs, event-driven order lifecycle |
 | **Frontend** | React 18 + Vite | Dark-themed dashboard with shadcn-style components |
 | **Maps** | Leaflet.js | Interactive route visualization on dark CARTO tiles |
 | **Charts** | Recharts | Analytics charts (bar, area, pie) |
@@ -102,7 +93,7 @@ Constructs initial solutions via GRASP with randomized candidate lists, then ite
 
 ### Option A: Docker Compose (recommended)
 
-One command to run the entire stack — API, worker, frontend, Postgres, Redis, Kafka:
+One command to run the entire stack — API, frontend, Postgres:
 
 ```bash
 docker-compose up --build
@@ -135,13 +126,11 @@ Backend runs on `:8080`, frontend on `:5173`.
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/health` | Health check (Postgres, Redis status) |
+| `GET` | `/api/health` | Health check (Postgres status) |
 | `GET` | `/api/sample-data` | Load 5 shoppers + 20 orders (Birmingham, AL) |
 | `POST` | `/api/optimize` | Basic nearest-neighbor optimization |
 | `POST` | `/api/optimize-analytics` | Optimization + full analytics + route geometries |
 | `POST` | `/api/optimize-hybrid-stream` | GRASP+ALNS solver with NDJSON progress stream |
-| `POST` | `/api/optimize-async` | Submit async job via Kafka (returns job ID) |
-| `GET` | `/api/optimize-async/:id` | Poll async job status |
 | `GET/POST` | `/api/orders` | List / create orders (PostgreSQL) |
 | `GET/POST` | `/api/shoppers` | List / create shoppers (PostgreSQL) |
 | `GET` | `/api/optimizations` | Optimization run history |
@@ -155,13 +144,10 @@ Backend runs on `:8080`, frontend on `:5173`.
 ├── backend/
 │   ├── cmd/
 │   │   ├── main.go                    # API server entry point
-│   │   └── worker/main.go             # Kafka consumer worker
 │   ├── internal/
 │   │   ├── api/                       # HTTP handlers (REST + streaming)
-│   │   ├── cache/                     # Redis client, distance & result cache
 │   │   ├── database/                  # PostgreSQL pool, migrations
 │   │   │   └── migrations/            # SQL migration files
-│   │   ├── messaging/                 # Kafka producer, consumer, events
 │   │   ├── models/                    # Domain types
 │   │   ├── optimizer/                 # Greedy, A*, hybrid algorithms
 │   │   │   └── hybrid/               # GRASP + ALNS solver
@@ -186,10 +172,7 @@ Backend runs on `:8080`, frontend on `:5173`.
 ├── k8s/                               # Kubernetes manifests
 │   ├── namespace.yaml
 │   ├── api-deployment.yaml            # 2-replica API with health probes
-│   ├── worker-deployment.yaml         # Kafka consumer worker
 │   ├── postgres-statefulset.yaml      # PVC-backed database
-│   ├── redis-deployment.yaml
-│   ├── kafka-statefulset.yaml         # Zookeeper + Kafka
 │   ├── configmap.yaml
 │   ├── secrets.yaml
 │   └── ingress.yaml
@@ -221,29 +204,6 @@ updated_at      updated_at          improvement_pct
 
 ---
 
-## Event-Driven Flow (Kafka)
-
-```
-API receives POST /api/optimize-async
-  │
-  ▼
-Publishes to topic: optimization.requests
-  │
-  ▼
-Worker consumes message
-  │
-  ▼
-Runs optimization algorithm
-  │
-  ├──▶ Persists result to PostgreSQL
-  │
-  └──▶ Publishes to topic: optimization.results
-```
-
-Topics: `order.events`, `optimization.requests`, `optimization.results`
-
----
-
 ## Testing
 
 24 tests across two packages, all passing:
@@ -266,7 +226,7 @@ GitHub Actions runs on push to `main` and on pull requests:
 
 1. **Lint** — `golangci-lint` static analysis
 2. **Test** — `go test -race` with Postgres + Redis service containers
-3. **Build** — Compile API and worker binaries
+3. **Build** — Compile API binary
 4. **Docker** — Build and push images to GitHub Container Registry
 
 ---
@@ -290,12 +250,10 @@ The API deployment runs 2 replicas with HTTP readiness and liveness probes on `/
 | Variable | Description | Default |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string | — |
-| `REDIS_URL` | Redis connection string | — |
-| `KAFKA_BROKERS` | Comma-separated Kafka broker addresses | — |
 | `OPENROUTE_API_KEY` | OpenRouteService API key (optional, for real road routing) | — |
 | `PORT` | API server port | `8080` |
 
-All services degrade gracefully — the API runs without Postgres, Redis, or Kafka, falling back to in-memory operation.
+All services degrade gracefully — the API runs without Postgres, falling back to in-memory operation.
 
 ---
 

@@ -5,16 +5,16 @@ import {
   ChevronDown, ChevronRight, Route as RouteIcon, Cpu,
   ArrowDownRight, Gauge
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Progress } from "../ui/progress";
-import { MetricCard } from "../ui/metric-card";
-import { AnimatedNumber } from "../ui/animated-number";
-import { cn, formatNumber, formatDuration, ROUTE_COLORS } from "../../lib/utils";
-import MapView from "../MapView";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Progress } from "../components/ui/progress";
+import { MetricCard } from "../components/ui/metric-card";
+import { AnimatedNumber } from "../components/ui/animated-number";
+import { cn, formatNumber, formatDuration, ROUTE_COLORS } from "../lib/utils";
+import MapView from "../components/features/MapView";
 
-function OptimizeView({
+function OptimizePage({
   orders, shoppers, assignments, stats, analytics, routeGeometries,
   loading, onOptimize, onOptimizeHybrid, onCancelHybrid,
   hybridRunning, hybridTimeline, hybridStats,
@@ -346,4 +346,4 @@ function OptimizeView({
   );
 }
 
-export default OptimizeView;
+export default OptimizePage;

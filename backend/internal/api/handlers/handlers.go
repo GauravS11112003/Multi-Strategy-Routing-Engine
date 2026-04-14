@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"shipt-route-optimizer/internal/cache"
 	"shipt-route-optimizer/internal/data"
 	"shipt-route-optimizer/internal/database"
 	"shipt-route-optimizer/internal/models"
@@ -30,19 +29,11 @@ func HealthCheck(c *gin.Context) {
 		}
 	}
 
-	redisStatus := "disconnected"
-	if cache.Client != nil {
-		if err := cache.HealthCheck(c.Request.Context()); err == nil {
-			redisStatus = "connected"
-		}
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "ok",
 		"service":   "shipt-route-optimizer",
 		"apiKeySet": apiKeySet,
 		"postgres":  dbStatus,
-		"redis":     redisStatus,
 	})
 }
 

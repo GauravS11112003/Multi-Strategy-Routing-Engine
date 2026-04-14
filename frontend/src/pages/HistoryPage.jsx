@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { History, Clock, TrendingDown, Zap, RefreshCw } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 
 const BASE_URL = "http://localhost:8080/api";
 
-function HistoryView() {
+function HistoryPage() {
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -125,4 +125,4 @@ function HistoryView() {
   );
 }
 
-export default HistoryView;
+export default HistoryPage;

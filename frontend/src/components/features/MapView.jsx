@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ROUTE_COLORS } from "../lib/utils";
+import { ROUTE_COLORS } from "../../lib/utils";
 
 const BIRMINGHAM = [33.5186, -86.8104];
 

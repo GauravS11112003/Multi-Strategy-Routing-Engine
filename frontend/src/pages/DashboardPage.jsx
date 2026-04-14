@@ -3,12 +3,12 @@ import {
   Package, Truck, Zap, Map, ArrowRight, Database, Cpu, Globe,
   Activity, Layers
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { MovingBorderCard } from "../ui/moving-border";
-import { SpotlightCard } from "../ui/spotlight-card";
-import { Badge } from "../ui/badge";
+import { Button } from "../components/ui/button";
+import { MovingBorderCard } from "../components/ui/moving-border";
+import { SpotlightCard } from "../components/ui/spotlight-card";
+import { Badge } from "../components/ui/badge";
 
-function DashboardView({ orders, shoppers, onLoadSampleData, onTabChange, loading }) {
+function DashboardPage({ orders, shoppers, onLoadSampleData, onTabChange, loading }) {
   const hasData = orders.length > 0;
 
   return (
@@ -201,4 +201,4 @@ function DashboardView({ orders, shoppers, onLoadSampleData, onTabChange, loadin
   );
 }
 
-export default DashboardView;
+export default DashboardPage;

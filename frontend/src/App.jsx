@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, AlertCircle } from "lucide-react";
-import Navbar from "./components/views/Navbar";
-import DashboardView from "./components/views/DashboardView";
-import OptimizeView from "./components/views/OptimizeView";
-import AnalyticsView from "./components/views/AnalyticsView";
-import HistoryView from "./components/views/HistoryView";
-import SettingsDialog from "./components/views/SettingsDialog";
-import { getSampleData, optimizeWithAnalytics, runHybridOptimization } from "./api/optimizer";
+import Navbar from "./components/layout/Navbar";
+import DashboardPage from "./pages/DashboardPage";
+import OptimizePage from "./pages/OptimizePage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import HistoryPage from "./pages/HistoryPage";
+import SettingsDialog from "./components/layout/SettingsDialog";
+import { getSampleData, optimizeWithAnalytics, runHybridOptimization } from "./services/optimizer";
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -222,7 +222,7 @@ function App() {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === "dashboard" && (
-          <DashboardView
+          <DashboardPage
             orders={orders}
             shoppers={shoppers}
             onLoadSampleData={handleLoadSampleData}
@@ -232,7 +232,7 @@ function App() {
         )}
 
         {activeTab === "optimize" && (
-          <OptimizeView
+          <OptimizePage
             orders={orders}
             shoppers={shoppers}
             assignments={assignments}
@@ -251,14 +251,14 @@ function App() {
         )}
 
         {activeTab === "analytics" && (
-          <AnalyticsView
+          <AnalyticsPage
             analytics={analytics}
             assignments={assignments}
           />
         )}
 
         {activeTab === "history" && (
-          <HistoryView />
+          <HistoryPage />
         )}
       </div>
 

@@ -11,12 +11,14 @@ shipt-route-optimizer/
 │   │
 │   ├── internal/                    # Private application code
 │   │   ├── api/
-│   │   │   └── handlers.go          # HTTP request handlers
+│   │   │   ├── handlers/            # HTTP request handlers
+│   │   │   └── router.go            # Route registration
 │   │   │
 │   │   ├── models/
 │   │   │   └── models.go            # Data structures (Order, Shopper, etc.)
 │   │   │
 │   │   ├── optimizer/
+│   │   │   ├── analytics.go         # Route optimization analytics
 │   │   │   └── optimizer.go         # Route optimization algorithms
 │   │   │
 │   │   └── data/
@@ -33,11 +35,23 @@ shipt-route-optimizer/
 │   │
 │   ├── src/
 │   │   ├── components/              # React components
-│   │   │   ├── MapView.jsx          # Leaflet map with markers & routes
-│   │   │   ├── Sidebar.jsx          # Control panel & data lists
-│   │   │   └── SummaryPanel.jsx     # Optimization results display
+│   │   │   ├── features/            # Feature-specific components
+│   │   │   │   ├── AnalyticsDashboard.jsx
+│   │   │   │   ├── MapView.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── SummaryPanel.jsx
+│   │   │   ├── layout/              # Layout components
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── SettingsDialog.jsx
+│   │   │   └── ui/                  # UI primitives
 │   │   │
-│   │   ├── api/
+│   │   ├── pages/                   # Application views
+│   │   │   ├── AnalyticsPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── HistoryPage.jsx
+│   │   │   └── OptimizePage.jsx
+│   │   │
+│   │   ├── services/
 │   │   │   └── optimizer.js         # Backend API client
 │   │   │
 │   │   ├── App.jsx                  # Main application component
@@ -50,6 +64,11 @@ shipt-route-optimizer/
 │   ├── tailwind.config.js           # Tailwind CSS configuration
 │   ├── postcss.config.js            # PostCSS configuration
 │   └── .gitignore                   # Git ignore rules
+│
+├── docs/                             # Documentation assets
+│   └── assets/
+│       ├── image.png
+│       └── image2.png
 │
 ├── README.md                         # Main documentation
 ├── QUICKSTART.md                     # Quick setup guide
@@ -68,7 +87,7 @@ shipt-route-optimizer/
 - Route registration
 - Entry point for `go run`
 
-**`internal/api/handlers.go`**
+**`internal/api/handlers/handlers.go`**
 - `/api/health` - Health check
 - `/api/sample-data` - Mock data generation
 - `/api/optimize` - Route optimization endpoint
@@ -96,25 +115,30 @@ shipt-route-optimizer/
 - About modal
 - Error handling
 
-**`src/components/MapView.jsx`**
+**`src/pages/DashboardPage.jsx`**
+**`src/pages/OptimizePage.jsx`**
+**`src/pages/AnalyticsPage.jsx`**
+**`src/pages/HistoryPage.jsx`**
+
+**`src/components/features/MapView.jsx`**
 - Leaflet map integration
 - Custom marker icons
 - Route polylines
 - Interactive popups
 
-**`src/components/Sidebar.jsx`**
+**`src/components/features/Sidebar.jsx`**
 - Action buttons (Load Data, Optimize)
 - Shopper list with assignments
 - Order list with details
 - Framer Motion animations
 
-**`src/components/SummaryPanel.jsx`**
+**`src/components/features/SummaryPanel.jsx`**
 - Optimization statistics
 - Animated number counters
 - Improvement calculations
 - Route breakdown
 
-**`src/api/optimizer.js`**
+**`src/services/optimizer.js`**
 - `getSampleData()` - Fetch mock data
 - `optimizeRoutes()` - Trigger optimization
 - `healthCheck()` - Backend health status

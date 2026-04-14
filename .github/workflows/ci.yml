@@ -46,15 +46,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +72,6 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgres://shipt_test:test_secret@localhost:5432/shipt_routing_test?sslmode=disable
-          REDIS_URL: redis://localhost:6379/0
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage
@@ -105,10 +95,6 @@ jobs:
       - name: Build API binary
         working-directory: backend
         run: CGO_ENABLED=0 go build -o bin/api cmd/main.go
-
-      - name: Build Worker binary
-        working-directory: backend
-        run: CGO_ENABLED=0 go build -o bin/worker cmd/worker/main.go
 
   docker:
     name: Docker Build & Push

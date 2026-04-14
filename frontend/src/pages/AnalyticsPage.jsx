@@ -9,13 +9,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { MetricCard } from "../ui/metric-card";
-import { Progress } from "../ui/progress";
-import { AnimatedNumber } from "../ui/animated-number";
-import { SpotlightCard } from "../ui/spotlight-card";
-import { cn, formatDuration, ROUTE_COLORS } from "../../lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { MetricCard } from "../components/ui/metric-card";
+import { Progress } from "../components/ui/progress";
+import { AnimatedNumber } from "../components/ui/animated-number";
+import { SpotlightCard } from "../components/ui/spotlight-card";
+import { cn, formatDuration, ROUTE_COLORS } from "../lib/utils";
 
 const CHART_COLORS = ["#00C389", "#3b82f6", "#a855f7", "#f43f5e", "#f59e0b"];
 
@@ -34,7 +34,7 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
-function AnalyticsView({ analytics, assignments }) {
+function AnalyticsPage({ analytics, assignments }) {
   const [drillDown, setDrillDown] = useState(null);
 
   if (!analytics) {
@@ -462,4 +462,4 @@ function AnalyticsView({ analytics, assignments }) {
   );
 }
 
-export default AnalyticsView;
+export default AnalyticsPage;
