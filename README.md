@@ -29,31 +29,6 @@ The engine takes a set of delivery orders and available shoppers, then finds the
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Frontend (React)                        │
-│              Vite · Tailwind · Leaflet · Recharts               │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ HTTP / NDJSON Stream
-┌───────────────────────────▼─────────────────────────────────────┐
-│                        API Service (Go/Gin)                     │
-│                                                                 │
-│  ┌──────────┐  ┌──────────┐  │
-│  │  REST API │  │  CRUD    │  │
-│  │  Handlers │  │  Repos   │  │
-│  └──────────┘  └────┬─────┘  │
-└──────────────────────┼────────┘
-                       │
-              ┌────────▼──┐
-              │ PostgreSQL │
-              │   (Data)   │
-              └────────────┘
-```
-
----
-
 ## Tech Stack
 
 | Layer | Technology | Purpose |
